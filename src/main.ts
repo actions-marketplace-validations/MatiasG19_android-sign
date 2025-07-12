@@ -1,13 +1,13 @@
 import * as core from '@actions/core'
-import fs, { Dirent } from 'fs'
-import path from 'path'
-import { signAabFile, signApkFile } from './sign'
+import fs, { Dirent } from 'node:fs'
+import * as path from 'node:path'
+import { signAabFile, signApkFile } from './sign.ts'
 
 function findReleaseFile(releaseDir: string): Dirent[] {
   return fs
     .readdirSync(releaseDir, { withFileTypes: true })
-    .filter(item => !item.isDirectory())
-    .filter(item => item.name.endsWith('.apk') || item.name.endsWith('.aab'))
+    .filter((item) => !item.isDirectory())
+    .filter((item) => item.name.endsWith('.apk') || item.name.endsWith('.aab'))
 }
 
 async function run(): Promise<void> {
@@ -18,7 +18,7 @@ async function run(): Promise<void> {
     const releaseDirs = core
       .getInput('releaseDirectory')
       .split('\n')
-      .filter(it => it !== '')
+      .filter((it) => it !== '')
     const signingKeyBase64 = core.getInput('signingKeyBase64')
     const alias = core.getInput('alias')
     const keyStorePassword = core.getInput('keyStorePassword')
@@ -45,7 +45,7 @@ async function run(): Promise<void> {
             signingKey,
             alias,
             keyStorePassword,
-            keyPassword
+            keyPassword,
           )
         } else if (releaseFile.name.endsWith('.aab')) {
           signedReleaseFile = await signAabFile(
@@ -53,7 +53,7 @@ async function run(): Promise<void> {
             signingKey,
             alias,
             keyStorePassword,
-            keyPassword
+            keyPassword,
           )
         } else {
           core.error('No valid release file to sign, abort.')
@@ -63,12 +63,12 @@ async function run(): Promise<void> {
           signedReleaseFile,
           path.join(
             output,
-            signedReleaseFile.split(/(\\|\/)/g).pop() ?? releaseFile.name
-          )
+            signedReleaseFile.split(/(\\|\/)/g).pop() ?? releaseFile.name,
+          ),
         )
       }
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // deno-lint-ignore no-explicit-any
   } catch (error: any) {
     core.setFailed(error.message)
   }
