@@ -36,3 +36,22 @@ jobs:
       - name: Lint
         working-directory: src
         run: deno lint
+
+      - name: Get signing key
+        run: echo "SIGNING_KEY=$(cat tests/assets/key_base64.txt | tr -d '\n')" >> $GITHUB_ENV
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Sign APK and AAB
+        uses: ./
+        with:
+          releaseDirectory: tests/assets
+          signingKeyBase64: ${{ env.SIGNING_KEY }}
+          output: signed
+          alias: test_key
+          keyStorePassword: android
+          keyPassword: android
